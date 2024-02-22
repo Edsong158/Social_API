@@ -1,19 +1,23 @@
 const express = require('express');
-const app = express();
-
-const PORT = process.env.PORT || 3333;
 
 const connection = require('./config/connection');
 
-const { user_routes } = require('./routes/api'); 
-// Middleware
+const PORT = process.env.PORT || 3333;
+
+const app = express();
+
+
+const { users_route, thoughts_route } = require('./routes/api_routes')
+
+
 app.use(express.json());
 
-// Load Routes 
-app.use('/api', [
-    user_routes
-]);
+
+app.use('/api', [users_route, thoughts_route]);
+
 
 connection.on('open', () => {
-  app.listen(PORT, () => console.log('Server started on port', PORT));
-});
+    app.listen(PORT, () => console.log('Server started on port', PORT));
+})
+
+
