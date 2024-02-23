@@ -1,163 +1,19 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
+const user_controller = require('../../controllers/user.controller');
 
-const { User } = require('../../models');
-const { handleRouteError } = require('../helpers')
+router.post('/user', user_controller.createUser);
 
+router.get('/users', user_controller.getAllUsers);
 
-// Create a User
-router.post('/user', async (req, res) => {
-    try {
-        const user = await User.create(req.body);
-        res.json(user);
-    } catch (err) {
-        handleRouteError(err, res);
-    }
-});
+router.post('/users/:user_id/friends/:friend_id', user_controller.addFriend);
 
-// Find All Users
-router.get('/users', async (req, res) => {
-    try {
-        const users = await User.find();
-        res.json(users);
-    } catch (err) {
-        handleRouteError(err, res);
-    }
-});
+router.delete('/users/:user_id/friends/:friend_id', user_controller.removeFriend);
 
-// Route to post new friend to user friend list
-router.post("/users/:user_id/friends/:friend_id", async (req, res) => {
-    try {
-      const { user_id, friend_id } = req.params;
-      const user = await User.findById(user_id);
-  
-      if (!user) {
-        return res.status(404).json({ message: "User not found." });
-      }
-  
-      if (user.friends.includes(friend_id)) {
-        return res.status(400).json({ message: "They are already friends" });
-      }
-  
-      if (user_id === friend_id) {
-        return res
-          .status(400)
-          .json({ message: "You cannot add the user to its own friends list" });
-      }
-  
-      const updatedUser = await User.findByIdAndUpdate(
-        user_id,
-        { $push: { friends: friend_id } },
-        { new: true }
-      );
-  
-      return res.json({
-        message: "Friend added successfully.",
-        updatedUser,
-      });
-    } catch (err) {
-      errorHandler(err, res);
-    }
-  });
-  
-  // Route to delete friend from user's friend list
-  router.delete("/users/:user_id/friends/:friend_id", async (req, res) => {
-    try {
-      const { user_id, friend_id } = req.params;
-      const user = await User.findById(user_id);
-  
-      if (!user) {
-        return res.status(404).json({ message: "User not found." });
-      }
-  
-      if (!user.friends.includes(friend_id)) {
-        return res.status(400).json({ message: "They are not friends" });
-      }
-  
-      if (user_id === friend_id) {
-        return res
-          .status(400)
-          .json({ message: "User ID and Friend ID are the same." });
-      }
-  
-      const updatedUser = await User.findByIdAndUpdate(
-        user_id,
-        { $pull: { friends: friend_id } },
-        { new: true }
-      );
-  
-      return res.json({
-        message: "Friend deleted successfully.",
-        updatedUser,
-      });
-    } catch (err) {
-      errorHandler(err, res);
-    }
-  });
+router.get('/user/:user_id', user_controller.getUserById);
 
-// Find User By ID
-router.get('/:user_id', async (req, res) => {
-    try {
-        const user = await User.findById(req.params.user_id);
-        if (!user) return res.status(404).json({ message: 'User with that ID could not be found' });
-        res.json(user);
-    } catch (err) {
-        handleRouteError(err, res);
-    }
-});
+router.put('/users/:user_id', user_controller.updateUserById);
 
-// Update A User by ID
-router.put('/users/:user_id', async (req, res) => {
-    const { email, password, newPassword } = req.body;
-
-    try {
-        if (email) {
-            const user = await User.findByIdAndUpdate(req.params.user_id, {
-                $set: {
-                    email: email
-                }
-            }, { new: true });
-
-            res.json(user);
-        }
-
-        if (password) {
-            const user = await User.findById(req.params.user_id);
-
-            const pass_valid = await user.validatePass(password);
-
-            if (!pass_valid) return res.status(401).json({
-                message: 'The old password is incorrect'
-            });
-
-            if (!user) return res.status(404).json({
-                message: 'User with that ID could not be found'
-            });
-
-            user.password = newPassword
-
-            user.save();
-
-            res.json(user);
-        }
-
-    } catch (err) {
-        handleRouteError(err, res);
-
-    }
-});
-
-// Delete a User
-router.delete('/user/:id', async (req, res) => {
-    try {
-        await User.deleteOne({});
-
-        res.json({
-            message: 'User delete suss'
-        })
-    } catch (err) {
-        handleRouteError(err, res);
-
-    }
-});
+router.delete('/user/:id', user_controller.deleteUserById);
 
 module.exports = router;

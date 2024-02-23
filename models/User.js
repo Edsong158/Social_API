@@ -39,16 +39,20 @@ const userSchema = new Schema(
 );
 
 userSchema.pre('save', async function (next) {
-    if (this.isNew || this.isModified('password')) {
-        this.password = await hash(this.password, 10);
+    if (this.isModified('password')) {
+        try {
+            const hashedPassword = await hash(this.password, 10);
+            this.password = hashedPassword;
+        } catch (error) {
+            return next(error);
+        }
     }
-
     next();
 });
 
 userSchema.methods.validatePass = async function 
 (formPassword) {
-    const is_valid = await compare(formPassword, this.password);
+    const is_valid = await compare(formPassword, hash, function(err, result){console.log('good password')});
 
     return is_valid;
 }
