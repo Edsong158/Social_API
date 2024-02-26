@@ -1,5 +1,5 @@
 const { handleRouteError } = require('../routes/helpers');
-const { User, Thought } = require('../routes/helpers');
+const { User, Thought } = require('../models');
 
 const getAllThoughts = async (req, res) => {
     try {

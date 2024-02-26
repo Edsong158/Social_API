@@ -6,10 +6,10 @@ const thought_controller = require('../../controllers/thought.controller');
 router.get('/thoughts', thought_controller.getAllThoughts);
 
 // Find thoughts by ID
-router.get('/thoughts/:thought_id', thought_controller.getThoughtById);
+router.get('/thought/:thought_id', thought_controller.getThoughtById);
 
-// Route to post new thought
-router.post('/thoughts', thought_controller.createThought);
+// Create New Thought
+router.post('/thought', thought_controller.createThought);
 
 // Update thought by ID
 router.put('/thought/:thought_id', thought_controller.updateThoughtById);
